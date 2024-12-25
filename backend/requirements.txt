@@ -1,0 +1,7 @@
+fastapi
+starlette
+pydantic
+uvicorn
+python-multipart
+pillow
+openai

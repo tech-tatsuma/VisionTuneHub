@@ -1,0 +1,25 @@
+version: '3'
+services:
+
+  backend:
+    build: ./backend
+    container_name: fastapi
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./backend:/4ovisionannotator/backend
+    ports:
+      - "8080:8080"
+    tty: true
+
+  frontend:
+    build: ./frontend
+    env_file:
+      - .env
+    volumes:
+      - ./frontend:/4ovisionannotator/frontend
+      - /4ovisionannotator/frontend/node_modules
+    ports:
+      - "3000:3000"
+    tty: true
