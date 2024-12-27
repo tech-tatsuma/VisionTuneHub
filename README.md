@@ -33,7 +33,7 @@ Upon accessing the frontend URL, the following page will appear:
 
 <img src="./imgs/firstpage.png" width="80%" />
 
-**Create a New Project**: Click the + button in the top-right corner to start a new project.
+**Create a New Project**: Click the `+` button in the top-right corner to start a new project.
 
 **Playground**: Navigate to the playground menu in the top bar to test models in the playground.
 ### Annotation
