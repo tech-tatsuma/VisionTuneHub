@@ -34,6 +34,7 @@ Upon accessing the frontend URL, the following page will appear:
 <img src="./imgs/firstpage.png" width="80%" />
 
 **Create a New Project**: Click the `+` button in the top-right corner to start a new project.
+
 **Playground**: Navigate to the playground menu in the top bar to test models in the playground.
 ### Annotation
 Input the necessary details for annotation.
@@ -42,4 +43,5 @@ Press `Shift + Enter` to confirm the annotation and move to the next one.
 After completing the annotations, click the `Download` button in the menu bar to download the dataset.
 ### Fine-Tuning
 Click the `Finetune` button in the menu bar to navigate to OpenAI's official fine-tuning page and proceed with the fine-tuning process.
+
 Enjoy using VisionTuneHub for efficient dataset creation and fine-tuning of Vision models!
