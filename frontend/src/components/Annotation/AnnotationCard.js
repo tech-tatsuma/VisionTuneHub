@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 
-const AnnotationSection = ({ pid, imagename, projectName, role, setRole, instruction, setInstruction, expectedResponse, setExpectedResponse, handleConfirm, backendurl, annotation }) => {
+const AnnotationCard = ({ pid, imagename, projectName, role, setRole, instruction, setInstruction, expectedResponse, setExpectedResponse, handleConfirm, backendurl, annotation, data_split, setDataSplit }) => {
   // console.log("imagename", imagename);
   const encodedImagename = encodeURIComponent(imagename);
   const imageurl = `${backendurl}/images/${pid}/imgs/${encodedImagename.replace(
@@ -11,6 +11,20 @@ const AnnotationSection = ({ pid, imagename, projectName, role, setRole, instruc
     event.target.style.height = "auto"; // Reset height
     event.target.style.height = `${event.target.scrollHeight}px`; // Adjust height dynamically
   };
+
+  const handleKeyDown = (event) => {
+    if (event.shiftKey && event.key === "Enter") {
+      event.preventDefault();
+      handleConfirm();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   console.log("imageurl", imageurl);
     return (
@@ -29,11 +43,25 @@ const AnnotationSection = ({ pid, imagename, projectName, role, setRole, instruc
             className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl"
             style={{
               backgroundImage: `url(${imageurl})`,
+              width: "480px", // 画像の幅を指定
+              height: "270px", // 画像の高さを指定
+              margin: "0 auto", // 画像を中央揃え
             }}
           ></div>
   
           <div className="grid grid-cols-[repeat(auto-fit,minmax(228px,1fr))] gap-2.5 px-4 py-3 @3xl:grid-cols-4">
             <div className="flex flex-1 flex-col gap-4 rounded-xl border border-solid border-[#DEDEDE] bg-[#FFFFFF] p-6">
+            <label className="flex flex-col gap-2">
+                <span className="text-black text-base font-bold leading-tight">Data Split</span>
+                <select
+                  value={data_split}
+                  onChange={(e) => setDataSplit(e.target.value)}
+                  className="form-input w-full resize-none overflow-hidden rounded-xl text-[#111418] focus:outline-0 focus:ring-0 border border-[#dce0e5] bg-white focus:border-[#1980e6] h-14 placeholder:text-[#637588] p-[15px] text-base font-normal leading-normal"
+                >
+                  <option value="train">Train</option>
+                  <option value="val">Validation</option>
+                </select>
+              </label>
             <label className="flex flex-col gap-2">
               <span className="text-black text-base font-bold leading-tight">Role</span>
               <textarea
@@ -74,8 +102,8 @@ const AnnotationSection = ({ pid, imagename, projectName, role, setRole, instruc
             </label>
             <button
               onClick={handleConfirm}
-              className="mt-4 px-4 py-2 bg-gray-300 text-black rounded shadow-sm"
-              style={{ width: "50%", alignSelf: "center" }}
+              className="mt-4 px-4 py-2 bg-gray-300 text-black rounded shadow-sm hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none transition w-full sm:w-auto"
+              style={{ alignSelf: "center" }}
             >
               Register
             </button>
@@ -87,4 +115,4 @@ const AnnotationSection = ({ pid, imagename, projectName, role, setRole, instruc
   };
   
 
-export default AnnotationSection;
+export default AnnotationCard;

@@ -1,6 +1,5 @@
 version: '3'
 services:
-
   backend:
     build: ./backend
     container_name: fastapi
@@ -10,16 +9,30 @@ services:
     volumes:
       - ./backend:/4ovisionannotator/backend
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     tty: true
+    networks:
+      - app-network
+    environment:
+      - BACKEND_HOST=${BACKEND_HOST}
+      - BACKEND_PORT=${BACKEND_PORT}
 
   frontend:
     build: ./frontend
+    container_name: react-frontend
     env_file:
       - .env
     volumes:
       - ./frontend:/4ovisionannotator/frontend
       - /4ovisionannotator/frontend/node_modules
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     tty: true
+    networks:
+      - app-network
+    environment:
+      - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
+
+networks:
+  app-network:
+    driver: bridge

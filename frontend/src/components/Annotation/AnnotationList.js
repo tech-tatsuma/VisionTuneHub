@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import AnnotationSection from "./annotationcard";
+import AnnotationCard from "./AnnotationCard";
 
-const AnnotationContent = ({pid}) => {
+const AnnotationList = ({pid}) => {
 
   const backendurl = process.env.REACT_APP_BACKEND_URL;
 
@@ -11,6 +11,7 @@ const AnnotationContent = ({pid}) => {
   const [role, setRole] = useState("");
   const [instruction, setInstruction] = useState("");
   const [expectedResponse, setExpectedResponse] = useState("");
+  const [data_split, setDataSplit] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,7 +26,8 @@ const AnnotationContent = ({pid}) => {
         );
         const data = await response.json();
         setAnnotations(data.annotations);
-        setProjectName(data.projectName);
+        setProjectName(data.project_info.name);
+        setDataSplit(data.dataset_split)
       } catch (error) {
         console.error("Failed to fetch annotations:", error);
       } finally {
@@ -67,6 +69,7 @@ const AnnotationContent = ({pid}) => {
       sys: role,
       user: instruction,
       label: expectedResponse,
+      dataset_split: data_split,
     };
   
     try {
@@ -94,6 +97,7 @@ const AnnotationContent = ({pid}) => {
       const updatedAnnotationsData = await updatedAnnotationsResponse.json();
       setAnnotations(updatedAnnotationsData.annotations);
       setProjectName(updatedAnnotationsData.projectName);
+      handleNextImage();
     } catch (error) {
       console.error("Error updating annotation:", error);
     } finally {
@@ -112,16 +116,58 @@ const AnnotationContent = ({pid}) => {
         throw new Error(errorData.detail || "Failed to generate dataset");
       }
 
-      // ダウンロード用のリンクを作成
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${pid}.jsonl`;
-      link.click();
-      window.URL.revokeObjectURL(url);
+      // Train と Val ファイルのURLを取得
+      const result = await response.json();
+      const trainFileUrl = result.train_file;
+      const valFileUrl = result.val_file;
+
+      // Train ファイルのダウンロード
+      const trainResponse = await fetch(trainFileUrl);
+      if (!trainResponse.ok) {
+        throw new Error("Failed to download train dataset");
+      }
+      const trainBlob = await trainResponse.blob();
+      const trainUrl = window.URL.createObjectURL(trainBlob);
+      const trainLink = document.createElement("a");
+      trainLink.href = trainUrl;
+      trainLink.download = `${pid}_train.jsonl`;
+      trainLink.click();
+      window.URL.revokeObjectURL(trainUrl);
+
+      // Val ファイルのダウンロード
+      const valResponse = await fetch(valFileUrl);
+      if (!valResponse.ok) {
+        throw new Error("Failed to download val dataset");
+      }
+      const valBlob = await valResponse.blob();
+      const valUrl = window.URL.createObjectURL(valBlob);
+      const valLink = document.createElement("a");
+      valLink.href = valUrl;
+      valLink.download = `${pid}_val.jsonl`;
+      valLink.click();
+      window.URL.revokeObjectURL(valUrl);
     } catch (error) {
       console.error("Error downloading dataset:", error);
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this project?");
+    if (confirmDelete) {
+      try {
+        const response = await fetch(`${backendurl}/projects/delete/${projectId}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          alert("The project has been deleted.");
+          window.location.href = "/projects"; // プロジェクト一覧ページにリダイレクト
+        } else {
+          alert("Failed to delete the project.");
+        }
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        alert("An error occurred.");
+      }
     }
   };
 
@@ -166,11 +212,24 @@ const AnnotationContent = ({pid}) => {
               </a>
             </div>
             <div className="flex items-center gap-9">
+              <a className="text-black text-sm font-medium leading-normal" href="https://platform.openai.com/finetune">
+                Finetune
+              </a>
+            </div>
+            <div className="flex items-center gap-9">
               <button
                 className="text-black text-sm font-medium leading-normal bg-blue-500 text-white px-4 py-2 rounded"
                 onClick={handleDownloadDataset}
               >
                 Download
+              </button>
+            </div>
+            <div className="flex items-center gap-9">
+              <button
+                className="text-black text-sm font-medium leading-normal bg-red-500 text-white px-4 py-2 rounded"
+                onClick={() => handleDeleteProject(pid)}
+              >
+                Delete
               </button>
             </div>
             <div className="flex gap-2">
@@ -197,7 +256,7 @@ const AnnotationContent = ({pid}) => {
           </button>
         </div>
         {annotations.length > 0 && annotations[imageIndexRef.current]?.image && (
-          <AnnotationSection
+          <AnnotationCard
             pid={pid}
             projectName={projectName}
             role={role}
@@ -210,6 +269,8 @@ const AnnotationContent = ({pid}) => {
             imagename={annotations[imageIndexRef.current].image}
             annotation={annotations[imageIndexRef.current]}
             backendurl={backendurl}
+            data_split={data_split}
+            setDataSplit={setDataSplit}
           />
         )}
       </div>
@@ -217,4 +278,4 @@ const AnnotationContent = ({pid}) => {
   );
 };
 
-export default AnnotationContent;
+export default AnnotationList;

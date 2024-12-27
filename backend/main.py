@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from routers import (
     annotation,
-    finetune,
+    playground,
     projects
 )
 
@@ -28,7 +28,7 @@ app = FastAPI(docs_url=None)
 app.mount("/images", StaticFiles(directory="./datas"), name="images")
 
 app.include_router(annotation.router)
-app.include_router(finetune.router)
+app.include_router(playground.router)
 app.include_router(projects.router)
 
 # CORSを回避する

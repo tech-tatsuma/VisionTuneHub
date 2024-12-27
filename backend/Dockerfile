@@ -1,11 +1,14 @@
-# python3.9のイメージをダウンロード
 FROM python:3.11-buster
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /4ovisionannotator/backend
+
+# ソースコードと依存関係をコピー
 COPY . /4ovisionannotator/backend
 
+# Pythonの依存パッケージをインストール
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "main:app","--reload","--host","0.0.0.0","--port","8080"]
+# アプリを起動
+CMD ["sh", "-c", "uvicorn main:app --reload --host $BACKEND_HOST --port $BACKEND_PORT"]

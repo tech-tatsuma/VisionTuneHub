@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import './App.css';
 import { BrowserRouter, Route, Routes, useParams, Navigate } from 'react-router-dom';
 
-import Projectlist_content from "./projects/projectlist";
-import MakeProjectContent from "./projects/makepro";
-import AnnotationContent from './annotations/annotation';
+import ProjectList from './components/Project/ProjectList';
+import CreateProject from './components/Project/CreateProject';
+import AnnotationList from './components/Annotation/AnnotationList';
+import PlayGroundView from './components/PlayGround/PlayGroundView';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           
           {/* 注釈関連のルーティング */}
           <Route path='/annotation/:pid' element={<AnnotationWithId />} />
+          <Route path='/playground' element={<PlayGroundRouter />} />
         </Routes>
       </div>
     </BrowserRouter>
@@ -32,7 +34,7 @@ export default App;
 const Project_list = () => {
   return(
     <div>
-      <Projectlist_content />
+      <ProjectList />
     </div>
   )
 }
@@ -40,7 +42,7 @@ const Project_list = () => {
 const MakeProject = () => {
   return(
     <div>
-      <MakeProjectContent />
+      <CreateProject />
     </div>
   )
 }
@@ -49,7 +51,15 @@ const AnnotationWithId = () => {
   const { pid } = useParams();
   return(
     <div>
-      <AnnotationContent pid={pid} />
+      <AnnotationList pid={pid} />
+    </div>
+  )
+}
+
+const PlayGroundRouter = () => {
+  return(
+    <div>
+      <PlayGroundView />
     </div>
   )
 }

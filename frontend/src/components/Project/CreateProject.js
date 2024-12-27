@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const MakeProjectContent = () => {
+const CreateProject = () => {
   const [projectName, setProjectName] = useState("");
   const [files, setFiles] = useState([]);
   const [defaultRole, setDefaultRole] = useState("");
   const [description, setDescription] = useState("");
+  const [trainRatio, setTrainRatio] = useState(0.8);
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
@@ -28,6 +29,7 @@ const MakeProjectContent = () => {
     formData.append("name", projectName);
     formData.append("default_role", defaultRole);
     formData.append("description", description);
+    formData.append("train_ratio", trainRatio);
 
     Array.from(files).forEach((file) => {
       formData.append("files", file);
@@ -42,8 +44,9 @@ const MakeProjectContent = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      alert("Project created successfully: " + JSON.stringify(response.data.project));
+      const createdProject = response.data.project;
+      const projectId = createdProject.id;
+      navigate(`/annotation/${projectId}`);
     } catch (error) {
       console.error("Upload Error:", error);
       alert("Failed to create project: " + error.message);
@@ -108,6 +111,19 @@ const MakeProjectContent = () => {
                   style={{ height: "auto" }}
                 />
               </label>
+              <label className="flex flex-col min-w-40 w-full max-w-[480px]">
+                <p className="text-[#111418] text-base font-medium leading-normal pb-2">Train Ratio</p>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  placeholder="Input Train Ratio (0-1)"
+                  value={trainRatio}
+                  onChange={(e) => setTrainRatio(parseFloat(e.target.value))}
+                  className="form-input w-full resize-none overflow-hidden rounded-xl text-[#111418] focus:outline-0 focus:ring-0 border border-[#dce0e5] bg-white focus:border-[#1980e6] h-14 placeholder:text-[#637588] p-[15px] text-base font-normal leading-normal"
+                />
+              </label>
             </div>
 
             <div className="flex px-4 py-3 justify-center w-full">
@@ -133,4 +149,4 @@ const MakeProjectContent = () => {
   );
 };
 
-export default MakeProjectContent;
+export default CreateProject;

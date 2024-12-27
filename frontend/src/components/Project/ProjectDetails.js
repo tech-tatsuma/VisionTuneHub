@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const ProductCard = ({ image, title, price, pid }) => {
+const ProjectDetails = ({ image, title, price, pid }) => {
     const backendurl = process.env.REACT_APP_BACKEND_URL;
     const navigate = useNavigate();
 
@@ -51,4 +51,4 @@ const ProductCard = ({ image, title, price, pid }) => {
     );
 };
 
-export default ProductCard;
+export default ProjectDetails;

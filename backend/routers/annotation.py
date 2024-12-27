@@ -7,51 +7,64 @@ import json
 import unicodedata
 import base64
 
-# エンドポイントの設定
+# エンドポイントをグループ化するためのAPIRouterの設定
 router = APIRouter(
     prefix='/annotation',
     tags=["annotation"]
 )
 
+# アノテーションデータを取得するエンドポイント
 @router.get("/get_annotations")
 async def get_annotations(pid: str):
+    # プロジェクトルートの設定
     project_root = f"./datas/{pid}"
     annotation_file = os.path.join(project_root, "annotation.json")
+    project_info_file = os.path.join(project_root, "project_info.json")
 
+    # アノテーションファイルの存在確認
     if not os.path.exists(annotation_file):
         raise HTTPException(status_code=404, detail="Annotation file not found")
 
     try:
+        with open(project_info_file, "r") as f:
+            project_info = json.load(f)
+        # JSONファイルの読み込み
         with open(annotation_file, "r") as f:
             annotations = json.load(f)
-        return {"project_id": pid, "annotations": annotations}
+        return {"project_id": pid, "annotations": annotations, "project_info": project_info}
     except json.JSONDecodeError:
+        # JSONの読み込みエラーに対応
         raise HTTPException(status_code=500, detail="Error reading annotation file")
 
 # 画像ファイルをエンコードする関数
 def encode_image(image_file):
     return base64.b64encode(image_file).decode('utf-8')
 
-def annojson2dataset(pid):
+# アノテーションデータを元にデータセットを作成する関数
+def annojson2dataset(pid, dataset_split):
+    # プロジェクトルートとアノテーションファイルのパスを設定
     project_root = f"./datas/{pid}"
     annotation_file = os.path.join(project_root, "annotation.json")
+
+    # アノテーションファイルの読み込み
     with open(annotation_file, "r") as f:
         annotations = json.load(f)
+
     # データセットファイルの作成
     dataset_path = os.path.join(project_root, "dataset.jsonl")
     with open(dataset_path, "w", encoding="utf-8") as f:
-        for anno in annotations: # anno->{'image':, 'sys':, 'user':, 'label':}
-            if (anno["sys"] != "") and (anno["user"] != "") and (anno["label"] != ""):
-                # 画像パスの取得
+        for anno in annotations: # アノテーションごとに処理
+            if anno["dataset_split"] == dataset_split and (anno["sys"] != "") and (anno["user"] != "") and (anno["label"] != ""):
+                # 画像ファイルのパスを取得
                 image_path = os.path.join(project_root, "imgs", anno["image"])
-                # 画像の読み込み
+                # 画像データの読み込み
                 with open(image_path, "rb") as i:
                     image_data = i.read()
-                # 画像のエンコード
+                # 画像データをBase64エンコード
                 base64_image = encode_image(image_data)
-                # エンコードした画像からURLを生成
+                # エンコードした画像データをURL形式に変換
                 url = f"data:image/jpeg;base64,{base64_image}"
-                # データの作成
+                # JSONL形式のデータを作成
                 item = {
                     "messages": [
                         {"role": "system", "content": anno["sys"]},
@@ -66,26 +79,43 @@ def annojson2dataset(pid):
 
     return dataset_path
 
-
+# データセットJSONLファイルを生成し，ダウンロード可能な形式で返すエンドポイント
 @router.post("/generate-jsonl")
 async def generate_jsonl(pid: str):
     try:
-        dataset_path = annojson2dataset(pid)
-        output_file = os.path.abspath(dataset_path)
-        if not os.path.exists(output_file):
+        train_path = annojson2dataset(pid, "train")
+        val_path = annojson2dataset(pid, "val")
+        train_file = os.path.abspath(train_path)
+        val_file = os.path.abspath(val_path)
+        # ファイルの存在確認
+        if not os.path.exists(train_file) or not os.path.exists(val_file):
             raise HTTPException(status_code=500, detail="JSONL file creation failed")
-        return FileResponse(output_file, media_type='application/json', filename=f"{pid}.jsonl")
+        return {
+            "train_file": f"/annotation/download?path={train_file}",
+            "val_file": f"/annotation/download?path={val_file}"
+        }
     except Exception as e:
+        # エラーが発生した場合に例外のトレースバックを表示
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
-# pidを受け取り，そのプロジェクトのannotation.jsonを返すエンドポイント
+# ファイルをダウンロードするエンドポイント
+@router.get("/download")
+async def download_file(path: str):
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="File not found")
+    filename = os.path.basename(path)
+    return FileResponse(path, media_type='application/json', filename=filename)
+
+# プロジェクトのアノテーション情報を取得するエンドポイント
 @router.get("/get_annotations")
 async def get_annotations(pid: str):
     project_root = f"./datas/{pid}"
     annotation_file = os.path.join(project_root, "annotation.json")
     project_info_file = os.path.join(project_root, "project_info.json")
+
+    # アノテーションとプロジェクト情報の読み込み
     with open(annotation_file, "r") as f:
         annotations = json.load(f)
     with open(project_info_file, "r") as f:
@@ -93,25 +123,27 @@ async def get_annotations(pid: str):
 
     return {"project_id": pid, "annotations": annotations, "project_info": project_info}
 
-# annotation情報の定義
+# アノテーション情報のデータモデルを定義
 class AnnotationInfo(BaseModel):
     pid: str
     image: str
     sys: str
     user: str
     label: str
+    dataset_split: str
 
 # Unicode正規化を行う関数
+# 入力文字列の正規化を行い，一貫性を保つ
 def normalize_string(s: str) -> str:
     return unicodedata.normalize('NFC', s.strip())
 
-# annotation情報を受け取り，annotation.jsonに追加または更新するエンドポイント
+# アノテーション情報を受け取り，JSONファイルを更新するエンドポイント
 @router.post("/add_annotation")
 async def add_annotation(anno_info: AnnotationInfo):
     project_root = f"./datas/{anno_info.pid}"
     annotation_file = os.path.join(project_root, "annotation.json")
 
-    # ファイルの存在確認
+    # アノテーションファイルの存在確認
     if not os.path.exists(annotation_file):
         raise HTTPException(status_code=404, detail="Annotation file not found")
 
@@ -133,6 +165,7 @@ async def add_annotation(anno_info: AnnotationInfo):
             annotation["sys"] = anno_info.sys
             annotation["user"] = anno_info.user
             annotation["label"] = anno_info.label
+            annotation["dataset_split"] = anno_info.dataset_split
             updated = True
             break
 
