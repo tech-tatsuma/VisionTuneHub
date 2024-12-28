@@ -10,6 +10,7 @@ const PlayGroundView = ({modelname}) => {
     const [uploadedImage, setUploadedImage] = useState(null);
     const [response, setResponse] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showApiKey, setShowApiKey] = useState(false);
 
     useEffect(() => {
       // ローカルストレージからAPIキーを読み込み
@@ -141,16 +142,23 @@ const PlayGroundView = ({modelname}) => {
               </div>
 
               <div className="flex flex-col gap-4 mt-4 w-full max-w-[480px]">
-              <label>
-                  <span className="text-black text-base font-bold leading-tight">OpenAI Key</span>
-                  <input
-                    type="text"
-                    placeholder="Enter API key"
-                    value={apikey}
-                    onChange={(e) => setApikey(e.target.value)}
-                    className="border border-[#E0E0E0] p-2 rounded w-full"
-                  />
-                </label>
+                <label className="relative">
+                                    <span className="text-black text-base font-bold leading-tight">OpenAI Key</span>
+                                    <input
+                                        type={showApiKey ? "text" : "password"}
+                                        placeholder="Enter API key"
+                                        value={apikey}
+                                        onChange={(e) => setApikey(e.target.value)}
+                                        className="border border-[#E0E0E0] p-2 rounded w-full"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowApiKey(!showApiKey)}
+                                        className="absolute right-2 top-8 text-gray-500 focus:outline-none"
+                                    >
+                                        {showApiKey ? "🙈" : "👁️"}
+                                    </button>
+                                </label>
                 <label>
                   <span className="text-black text-base font-bold leading-tight">Model</span>
                   <input
@@ -168,6 +176,16 @@ const PlayGroundView = ({modelname}) => {
                     placeholder="Enter role"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
+                    rows={3}
+                    style={{
+                      resize: "none", // 手動リサイズを防ぐ
+                      overflow: "hidden", // スクロールバーを非表示にする
+                    }}
+                    onInput={(e) => {
+                      // 高さをリセットしてから適切な高さに調整
+                      e.target.style.height = "auto";
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
                     className="border border-[#E0E0E0] p-2 rounded w-full"
                   />
                 </label>
@@ -178,6 +196,16 @@ const PlayGroundView = ({modelname}) => {
                     placeholder="Enter instruction"
                     value={instruction}
                     onChange={(e) => setInstruction(e.target.value)}
+                    rows={3}
+                    style={{
+                      resize: "none", // 手動リサイズを防ぐ
+                      overflow: "hidden", // スクロールバーを非表示にする
+                    }}
+                    onInput={(e) => {
+                      // 高さをリセットしてから適切な高さに調整
+                      e.target.style.height = "auto";
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
                     className="border border-[#E0E0E0] p-2 rounded w-full"
                   />
                 </label>

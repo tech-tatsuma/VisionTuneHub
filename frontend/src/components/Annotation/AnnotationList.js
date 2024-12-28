@@ -60,6 +60,21 @@ const AnnotationList = ({pid}) => {
     }
   }, [currentImageIndex, annotations]);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "ArrowRight") {
+        handleNextImage();
+      } else if (event.key === "ArrowLeft") {
+        handlePreviousImage();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [annotations]);
+
   const handleNextImage = () => {
     if (imageIndexRef.current < annotations.length - 1) {
       imageIndexRef.current += 1;
@@ -351,6 +366,11 @@ const AnnotationList = ({pid}) => {
                   handleSave(); // 保存処理を呼び出す
                   toggleModal();
                 }}
+                onKeyDown={(e) => {
+                  if (e.target.tagName !== "TEXTAREA" && e.key === "Enter") {
+                    e.preventDefault(); // `textarea` 以外では Enter キーのデフォルト動作を無効化
+                  }
+                }}
               >
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-2">Name</label>
@@ -363,11 +383,20 @@ const AnnotationList = ({pid}) => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-2">Description</label>
-                  <input
-                    type="text"
+                  <textarea
                     className="w-full px-3 py-2 border rounded"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    style={{
+                      resize: "none", // 手動リサイズを防ぐ
+                      overflow: "hidden", // スクロールバーを非表示にする
+                    }}
+                    onInput={(e) => {
+                      // 高さをリセットしてから適切な高さに調整
+                      e.target.style.height = "auto";
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
                   />
                 </div>
                 <div className="mb-4">
