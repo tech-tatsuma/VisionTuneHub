@@ -12,6 +12,7 @@ const AnnotationList = ({pid}) => {
   const [instruction, setInstruction] = useState("");
   const [expectedResponse, setExpectedResponse] = useState("");
   const [data_split, setDataSplit] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -171,6 +172,10 @@ const AnnotationList = ({pid}) => {
     }
   };
 
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
   if (isLoading) {
     // ローディング中の表示
     return (
@@ -232,6 +237,14 @@ const AnnotationList = ({pid}) => {
                 Delete
               </button>
             </div>
+            <div className="flex items-center gap-9">
+              <button
+                className="text-black text-sm font-medium leading-normal"
+                onClick={toggleModal}
+              >
+                Setting
+              </button>
+            </div>
             <div className="flex gap-2">
             </div>
           </div>
@@ -274,6 +287,38 @@ const AnnotationList = ({pid}) => {
           />
         )}
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded shadow-lg w-1/3">
+            <h3 className="text-lg font-bold mb-4">Settings</h3>
+            <form>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Setting Option 1</label>
+                <input type="text" className="w-full px-3 py-2 border rounded" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Setting Option 2</label>
+                <input type="text" className="w-full px-3 py-2 border rounded" />
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-gray-200 rounded"
+                  onClick={toggleModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

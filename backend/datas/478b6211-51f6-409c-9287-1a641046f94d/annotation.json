@@ -1,0 +1,93 @@
+[
+    {
+        "image": "DALL·E 2024-02-29 20.31.18 - A simple illustration of an Asian person frowning and looking up to the left as if deep in thought. The focus should be on capturing a contemplative e.webp",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "DALL·E 2024-02-19 14.11.10 - A simple illustration showing a single student in a classroom who is not focusing on the lesson but instead is asleep at their desk. The student is sl.webp",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "DALL·E 2024-04-24 21.17.15 - Create an illustration of a group discussion taking place in a modern office setting. The scene features four people sitting around a circular table w.webp",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "思いつき.png",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "吹き出し.png",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "DALL·E 2024-03-24 17.10.29 - A whimsical illustration of a robot sitting at a desk, studying a book titled 'Machine Learning Basics' with enthusiasm. The robot is surrounded by fl.webp",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "7OGMmfZgnpBbVQ31732701544_1732701551.png",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "人工知能.png",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "takemura-lab-logo.png",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "悩み中.png",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "train"
+    },
+    {
+        "image": "DALL·E 2024-05-26 02.02.05 - A simple illustration of a man typing on a computer, viewed from a diagonal rear angle. The man is sitting at a desk, focused on the screen. The illus.webp",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "val"
+    },
+    {
+        "image": "DALL·E 2024-02-19 14.47.03 - A simple illustration of a single character sleeping instead of paying attention in class. The scene is set in a classroom environment, with the chara.webp",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "val"
+    },
+    {
+        "image": "ぼーっとしている.webp",
+        "sys": "この画像は何の画像ですか？",
+        "user": "",
+        "label": "",
+        "dataset_split": "val"
+    }
+]
