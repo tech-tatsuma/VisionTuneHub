@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./PlayGroundView.css";
 
@@ -11,6 +11,14 @@ const PlayGroundView = () => {
     const [response, setResponse] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    useEffect(() => {
+      // ローカルストレージからAPIキーを読み込み
+      const savedKey = localStorage.getItem("api_key");
+      if (savedKey) {
+          setApikey(savedKey);
+      }
+    }, []);
+
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -19,10 +27,16 @@ const PlayGroundView = () => {
       };
 
     const handleSubmit = async () => {
-        if (!model || !role || !instruction || !uploadedImage) {
-          alert("Please fill in all fields and upload an image.");
-          return;
-        }
+
+      if (window.confirm("Do you want to save this API key for future use?")) {
+        localStorage.setItem("api_key", apikey);
+      }
+      setApikey(apikey);
+      
+      if (!model || !role || !instruction || !uploadedImage) {
+        alert("Please fill in all fields and upload an image.");
+        return;
+      }
     
         try {
           setIsLoading(true);
