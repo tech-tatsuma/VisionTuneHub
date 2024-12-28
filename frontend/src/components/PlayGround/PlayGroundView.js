@@ -165,7 +165,7 @@ const PlayGroundView = () => {
 
                 <button
                   onClick={handleSubmit}
-                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded shadow-sm hover:bg-blue-600"
+                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded shadow-sm hover:bg-blue-400 transition duration-300"
                 >
                   Submit
                 </button>

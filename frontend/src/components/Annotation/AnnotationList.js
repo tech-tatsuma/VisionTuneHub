@@ -13,28 +13,36 @@ const AnnotationList = ({pid}) => {
   const [expectedResponse, setExpectedResponse] = useState("");
   const [data_split, setDataSplit] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [description, setDescription] = useState("");
+  const [model, setModel] = useState("");
+  const [projectnameupdate, setProjectNameUpdate] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   // 画像のインデックスをリロードせずに保持するためのref
   const imageIndexRef = useRef(currentImageIndex);
 
+  const fetchAnnotations = async () => {
+    try {
+      const response = await fetch(
+        `${backendurl}/annotation/get_annotations?pid=${pid}`
+      );
+      const data = await response.json();
+      setAnnotations(data.annotations);
+      setProjectName(data.project_info.name);
+      setDataSplit(data.dataset_split);
+      setDescription(data.project_info.description);
+      setModel(data.project_info.model);
+      setProjectNameUpdate(data.project_info.name);
+    } catch (error) {
+      console.error("Failed to fetch annotations:", error);
+    } finally {
+      setIsLoading(false); // データ取得終了時にローディングを無効化
+    }
+  };
+
   useEffect(() => {
-    const fetchAnnotations = async () => {
-      try {
-        const response = await fetch(
-          `${backendurl}/annotation/get_annotations?pid=${pid}`
-        );
-        const data = await response.json();
-        setAnnotations(data.annotations);
-        setProjectName(data.project_info.name);
-        setDataSplit(data.dataset_split)
-      } catch (error) {
-        console.error("Failed to fetch annotations:", error);
-      } finally {
-        setIsLoading(false); // データ取得終了時にローディングを無効化
-      }
-    };
     fetchAnnotations();
   }, [pid]);
 
@@ -172,6 +180,40 @@ const AnnotationList = ({pid}) => {
     }
   };
 
+  const handleSave = async () => {
+    const formData = new FormData();
+    formData.append("pid", pid);
+    formData.append("name", projectnameupdate);
+    formData.append("description", description);
+    formData.append("model", model);
+
+    selectedFiles.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    try {
+      const response = await fetch(`${backendurl}/projects/add_image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload files");
+      }
+
+      const result = await response.json();
+      console.log("Files uploaded successfully:", result);
+
+      setIsLoading(true);
+      await fetchAnnotations();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error uploading files:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -288,37 +330,75 @@ const AnnotationList = ({pid}) => {
         )}
       </div>
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded shadow-lg w-1/3">
-            <h3 className="text-lg font-bold mb-4">Settings</h3>
-            <form>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Setting Option 1</label>
-                <input type="text" className="w-full px-3 py-2 border rounded" />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Setting Option 2</label>
-                <input type="text" className="w-full px-3 py-2 border rounded" />
-              </div>
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-gray-200 rounded"
-                  onClick={toggleModal}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded shadow-lg w-1/3">
+              <h3 className="text-lg font-bold mb-4">Settings</h3>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSave(); // 保存処理を呼び出す
+                  toggleModal();
+                }}
+              >
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Name</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                    value={projectnameupdate}
+                    onChange={(e) => setProjectNameUpdate(e.target.value)}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Description</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Model Register</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Add Images</label>
+                  <input
+                    type="file"
+                    className="w-full px-3 py-2 border rounded"
+                    webkitdirectory="true"
+                    directory="true"
+                    multiple
+                    onChange={(e) => {
+                      setSelectedFiles(Array.from(e.target.files)); // 選択されたファイルを状態に保存
+                    }}
+                  />
+                </div>
+                <div className="flex justify-end gap-4">
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-gray-200 rounded"
+                    onClick={toggleModal}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };

@@ -7,6 +7,10 @@ import uuid
 from datetime import datetime
 from PIL import Image
 import random
+import logging
+from fastapi.logger import logger
+
+logging.basicConfig(level=logging.INFO)
 
 # エンドポイントの設定
 router = APIRouter(
@@ -91,6 +95,7 @@ async def create_project(
         "created_at": datetime.now().isoformat(),
         "dir_path": os.path.abspath(project_root),
         "description": description,
+        "model": "",
     }
 
     # project_info.json 作成
@@ -156,3 +161,81 @@ async def list_projects():
                 })
 
     return project_summaries
+
+# プロジェクトに画像を追加するエンドポイント
+@router.post("/add_image", status_code=status.HTTP_201_CREATED)
+async def add_image(
+    pid: str = Form(...),
+    files: List[UploadFile] = Form([]),
+    name: str = Form(...),
+    description: str = Form(...),
+    model: str = Form(...)
+):
+
+    logger.info(f"Received files: {files}")
+    logger.info(f"Received pid: {pid}, name: {name}, description: {description}, model: {model}")
+    # プロジェクトディレクトリのパスを取得
+    project_root = f"./datas/{pid}"
+    imgs_dir = os.path.join(project_root, "imgs")
+    annotation_file = os.path.join(project_root, "annotation.json")
+    project_info_file = os.path.join(project_root, "project_info.json")
+
+    images_paths = []
+
+    # 既存のアノテーション情報の取得
+    with open(annotation_file, "r") as f:
+        annotations = json.load(f)
+
+    if files:
+        for file in files:
+            # アップロードされたファイルが画像かどうかを確認
+            try:
+                img = Image.open(file.file)
+                img.verify()
+                file.file.seek(0)
+            except (IOError, SyntaxError):
+                continue
+
+            # ファイル名と保存パスを設定
+            file_name = os.path.basename(file.filename.replace("\\", "/"))
+            full_file_path = os.path.join(imgs_dir, file_name)
+
+            # 重複チェック
+            if os.path.exists(full_file_path):
+                # ファイル名に一意の識別子を追加
+                fname, ext = os.path.splitext(file_name)
+                unique_id = uuid.uuid4().hex[:6]
+                file_name = f"{fname}_{unique_id}{ext}"
+                full_file_path = os.path.join(imgs_dir, file_name)
+
+            # ファイル保存
+            with open(full_file_path, "wb") as buffer:
+                buffer.write(await file.read())
+            images_paths.append(full_file_path)
+
+        default_role = annotations[0]["sys"]
+
+        # 追加された画像のアノテーション情報を追加
+        for img_path in images_paths:
+            annotations.append({
+                "image": os.path.relpath(img_path, imgs_dir),
+                "sys": default_role,
+                "user": "",
+                "label": "",
+                "dataset_split": "train"
+            })
+        with open(annotation_file, 'w') as f:
+            json.dump(annotations, f, indent=4, ensure_ascii=False)
+
+    # プロジェクト情報の更新
+    with open(project_info_file, "r") as f:
+        project_info = json.load(f)
+        project_info["image_count"] = len(annotations)
+        project_info["model"] = model
+        project_info["description"] = description
+        project_info["name"] = name
+
+    with open(project_info_file, 'w') as f:
+        json.dump(project_info, f, indent=4, ensure_ascii=False)
+    
+    return {"message": "Images added successfully", "project": project_info, "annotations": annotations}

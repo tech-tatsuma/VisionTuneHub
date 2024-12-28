@@ -60,6 +60,7 @@ const AnnotationCard = ({ pid, imagename, projectName, role, setRole, instructio
                 >
                   <option value="train">Train</option>
                   <option value="val">Validation</option>
+                  <option value="invalid">Invalid</option>
                 </select>
               </label>
             <label className="flex flex-col gap-2">
