@@ -22,6 +22,7 @@ function App() {
           {/* 注釈関連のルーティング */}
           <Route path='/annotation/:pid' element={<AnnotationWithId />} />
           <Route path='/playground' element={<PlayGroundRouter />} />
+          <Route path='/testmodel/:model' element={<TestModel />} />
         </Routes>
       </div>
     </BrowserRouter>
@@ -59,7 +60,17 @@ const AnnotationWithId = () => {
 const PlayGroundRouter = () => {
   return(
     <div>
-      <PlayGroundView />
+      <PlayGroundView modelname={""} />
+    </div>
+  )
+}
+
+const TestModel = () => {
+  const { model } = useParams();
+  console.log("model: "+model);
+  return(
+    <div>
+      <PlayGroundView modelname={model} />
     </div>
   )
 }

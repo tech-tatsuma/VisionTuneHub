@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./PlayGroundView.css";
 
-const PlayGroundView = () => {
-    const [model, setModel] = useState("");
+const PlayGroundView = ({modelname}) => {
+    const [model, setModel] = useState(modelname);
     const [role, setRole] = useState("");
     const [apikey, setApikey] = useState("");
     const [instruction, setInstruction] = useState("");
@@ -98,7 +98,12 @@ const PlayGroundView = () => {
           </div>
           <div className="flex flex-1 justify-end gap-8">
                         <div className="flex items-center gap-9">
-                        <a className="text-black text-sm font-medium leading-normal" href="/projects">
+                        <a className="text-black text-sm font-medium leading-normal" href="/projects"
+                        style={{
+                          transition: "color 0.3s ease", // スムーズな変化を追加
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
                             Projects
                         </a>
                         </div>
@@ -111,7 +116,7 @@ const PlayGroundView = () => {
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
             <div className="flex flex-wrap justify-between gap-3 p-4">
               <div className="flex min-w-72 flex-col gap-3">
-                <p className="text-black text-4xl font-black leading-tight tracking-[-0.033em]">PlayGround</p>
+                <p className="text-black text-4xl font-black leading-tight tracking-[-0.033em] hover:text-customHoverColor">PlayGround</p>
               </div>
             </div>
 
@@ -180,6 +185,9 @@ const PlayGroundView = () => {
                 <button
                   onClick={handleSubmit}
                   className="mt-4 px-4 py-2 bg-blue-500 text-white rounded shadow-sm hover:bg-blue-400 transition duration-300"
+                  style={{ background: "#495867" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#577399")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "#495867")}
                 >
                   Submit
                 </button>

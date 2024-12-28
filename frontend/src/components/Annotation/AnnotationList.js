@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import AnnotationCard from "./AnnotationCard";
+import { useNavigate } from "react-router-dom";
+import PlayGroundView from './../PlayGround/PlayGroundView';
 
 const AnnotationList = ({pid}) => {
 
@@ -22,6 +24,8 @@ const AnnotationList = ({pid}) => {
 
   // 画像のインデックスをリロードせずに保持するためのref
   const imageIndexRef = useRef(currentImageIndex);
+
+  const navigate = useNavigate();
 
   const fetchAnnotations = async () => {
     try {
@@ -167,15 +171,11 @@ const AnnotationList = ({pid}) => {
         const response = await fetch(`${backendurl}/projects/delete/${projectId}`, {
           method: "DELETE",
         });
-        if (response.ok) {
-          alert("The project has been deleted.");
-          window.location.href = "/projects"; // プロジェクト一覧ページにリダイレクト
-        } else {
-          alert("Failed to delete the project.");
-        }
       } catch (error) {
         console.error("Error deleting project:", error);
         alert("An error occurred.");
+      } finally {
+        navigate("/projects");
       }
     }
   };
@@ -254,34 +254,46 @@ const AnnotationList = ({pid}) => {
           </div>
           <div className="flex flex-1 justify-end gap-8">
             <div className="flex items-center gap-9">
-              <a className="text-black text-sm font-medium leading-normal" href="/projects">
+              <a className="text-black text-sm font-medium leading-normal" href="/projects" 
+              style={{
+                  transition: "color 0.3s ease", // スムーズな変化を追加
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
                 Projects
               </a>
             </div>
             <div className="flex items-center gap-9">
-              <a className="text-black text-sm font-medium leading-normal" href="https://platform.openai.com/finetune">
+              <a className="text-black text-sm font-medium leading-normal hover:text-customHoverColor" href="https://platform.openai.com/finetune"
+              style={{
+                transition: "color 0.3s ease", // スムーズな変化を追加
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
                 Finetune
               </a>
             </div>
             <div className="flex items-center gap-9">
               <button
-                className="text-black text-sm font-medium leading-normal bg-blue-500 text-white px-4 py-2 rounded"
+                className="text-black text-sm font-medium leading-normal"
                 onClick={handleDownloadDataset}
+                style={{
+                  transition: "color 0.3s ease", // スムーズな変化を追加
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
               >
                 Download
               </button>
             </div>
             <div className="flex items-center gap-9">
               <button
-                className="text-black text-sm font-medium leading-normal bg-red-500 text-white px-4 py-2 rounded"
-                onClick={() => handleDeleteProject(pid)}
-              >
-                Delete
-              </button>
-            </div>
-            <div className="flex items-center gap-9">
-              <button
                 className="text-black text-sm font-medium leading-normal"
+                style={{
+                  transition: "color 0.3s ease", // スムーズな変化を追加
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
                 onClick={toggleModal}
               >
                 Setting
@@ -293,7 +305,7 @@ const AnnotationList = ({pid}) => {
         </header>
         <div className="flex justify-between items-center px-10 py-4">
           <button
-            className="px-4 py-2 bg-gray-200 rounded"
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-400"
             onClick={handlePreviousImage}
             disabled={imageIndexRef.current === 0}
           >
@@ -303,7 +315,7 @@ const AnnotationList = ({pid}) => {
             Image {imageIndexRef.current + 1} of {annotations.length}
           </span>
           <button
-            className="px-4 py-2 bg-gray-200 rounded"
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-400"
             onClick={handleNextImage}
             disabled={imageIndexRef.current === annotations.length - 1}
           >
@@ -380,6 +392,29 @@ const AnnotationList = ({pid}) => {
                     }}
                   />
                 </div>
+                <div className="mb-4">
+                  <button
+                    type="button"
+                    className="text-black text-sm font-medium leading-normal text-white px-4 py-2 rounded"
+                    style={{ backgroundColor: "#577399" }}
+                    onClick={() => {
+                      console.log("Model before navigating:", model);
+                      // PlayGroundViewを呼び出す（ここでモデル名を渡す）
+                      navigate(`/testmodel/${model}`);
+                    }}
+                  >
+                    Test Model
+                  </button>
+                </div>
+                <div className="flex items-center gap-9">
+                  <button
+                    className="text-black text-sm font-medium leading-normal text-white px-4 py-2 rounded"
+                    style={{ backgroundColor: "#FE5F55" }}
+                    onClick={() => handleDeleteProject(pid)}
+                  >
+                    Delete this projects
+                  </button>
+                </div>
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
@@ -391,6 +426,7 @@ const AnnotationList = ({pid}) => {
                   <button
                     type="submit"
                     className="px-4 py-2 bg-blue-500 text-white rounded"
+                    style={{ backgroundColor: "#495867" }}
                   >
                     Save
                   </button>

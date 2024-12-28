@@ -84,7 +84,12 @@ const ProjectList = () => {
                     </div>
                     <div className="flex flex-1 justify-end gap-8">
                         <div className="flex items-center gap-9">
-                        <a className="text-black text-sm font-medium leading-normal" href="/playground">
+                        <a className="text-black text-sm font-medium leading-normal" href="/playground"
+                        style={{
+                            transition: "color 0.3s ease", // スムーズな変化を追加
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
                             PlayGround
                         </a>
                         </div>
@@ -100,6 +105,9 @@ const ProjectList = () => {
                         onClick={handleAddProject}
                         className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full text-lg"
                         title="Add Project"
+                        style={{ background: "#577399" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "#495867")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "#577399")}
                     >
                         +
                     </button>
@@ -127,6 +135,9 @@ const ProjectList = () => {
                                 currentPage === pageNumber ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
                             } hover:bg-blue-400 focus:outline-none ${pageNumber === '...' ? 'cursor-default' : ''}`}
                             disabled={pageNumber === '...'}
+                            style={{ background: "#577399"}}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#495867")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "#577399")}
                         >
                             {pageNumber}
                         </button>

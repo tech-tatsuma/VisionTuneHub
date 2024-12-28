@@ -4,8 +4,10 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
     "./public/index.html",
   ],
-  theme: {
-    extend: {},
+  extend: {
+    colors: {
+      customHoverColor: "#495867", // カスタムホバーカラー
+    },
   },
   plugins: [],
 };
