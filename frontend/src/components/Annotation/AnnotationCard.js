@@ -28,8 +28,8 @@ const AnnotationCard = ({ pid, imagename, projectName, role, setRole, instructio
 
   console.log("imageurl", imageurl);
     return (
-      <div className="px-40 flex flex-1 justify-center py-5">
-        <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
+      <div className="px-4 md:px-10 flex flex-1 justify-center py-5">
+        <div className="layout-content-container flex flex-col w-full max-w-[960px]">
           <div className="flex flex-wrap justify-between gap-3 p-4">
             <div className="flex min-w-72 flex-col gap-3">
               <p className="text-black text-4xl font-black leading-tight tracking-[-0.033em]">{projectName}</p>
@@ -39,15 +39,7 @@ const AnnotationCard = ({ pid, imagename, projectName, role, setRole, instructio
             </div>
           </div>
   
-          <div
-            className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl"
-            style={{
-              backgroundImage: `url(${imageurl})`,
-              width: "480px", // 画像の幅を指定
-              height: "270px", // 画像の高さを指定
-              margin: "0 auto", // 画像を中央揃え
-            }}
-          ></div>
+          <div className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl" style={{ backgroundImage: `url(${imageurl})` }}></div>
   
           <div className="grid grid-cols-[repeat(auto-fit,minmax(228px,1fr))] gap-2.5 px-4 py-3 @3xl:grid-cols-4">
             <div className="flex flex-1 flex-col gap-4 rounded-xl border border-solid border-[#DEDEDE] bg-[#FFFFFF] p-6">

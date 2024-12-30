@@ -19,6 +19,7 @@ const AnnotationList = ({pid}) => {
   const [model, setModel] = useState("");
   const [projectnameupdate, setProjectNameUpdate] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,6 +88,10 @@ const AnnotationList = ({pid}) => {
       imageIndexRef.current -= 1;
       setCurrentImageIndex(imageIndexRef.current);
     }
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
   };
 
   const handleConfirm = async () => {
@@ -245,11 +250,11 @@ const AnnotationList = ({pid}) => {
   
   return (
     <div
-      className="relative flex size-full min-h-screen flex-col bg-[#FFFFFF] group/design-root overflow-x-hidden"
+      className="relative flex size-full min-h-screen flex-col bg-[#FFFFFF] overflow-x-hidden"
       style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
     >
       <div className="layout-container flex h-full grow flex-col">
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#EEEEEE] px-10 py-3">
+      <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#EEEEEE] px-10 py-3">
           <div className="flex items-center gap-4 text-black">
             <div className="size-4">
               <svg
@@ -263,32 +268,36 @@ const AnnotationList = ({pid}) => {
                 ></path>
               </svg>
             </div>
-            <h2 className="text-black text-lg font-bold leading-tight tracking-[-0.015em]">
+            <h2 className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold leading-tight tracking-[-0.015em] text-black">
               VisionTuneHub
             </h2>
           </div>
-          <div className="flex flex-1 justify-end gap-8">
-            <div className="flex items-center gap-9">
-              <a className="text-black text-sm font-medium leading-normal" href="/projects" 
-              style={{
-                  transition: "color 0.3s ease", // スムーズな変化を追加
-                }}
+          <div className="flex items-center gap-8">
+            <button
+              className="lg:hidden text-black text-lg w-12 h-12 flex items-center justify-center"
+              onClick={toggleMenu}
+            >
+              ☰
+            </button>
+            <nav className="hidden lg:flex items-center gap-9">
+              <a
+                className="text-black text-sm font-medium leading-normal hover:text-customHoverColor"
+                href="/projects"
+                style={{ transition: "color 0.3s ease" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
+                onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+              >
                 Projects
               </a>
-            </div>
-            <div className="flex items-center gap-9">
               <a className="text-black text-sm font-medium leading-normal hover:text-customHoverColor" href="https://platform.openai.com/finetune"
               style={{
                 transition: "color 0.3s ease", // スムーズな変化を追加
               }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
+              onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+              >
                 Finetune
               </a>
-            </div>
-            <div className="flex items-center gap-9">
               <button
                 className="text-black text-sm font-medium leading-normal"
                 onClick={handleDownloadDataset}
@@ -300,8 +309,6 @@ const AnnotationList = ({pid}) => {
               >
                 Download
               </button>
-            </div>
-            <div className="flex items-center gap-9">
               <button
                 className="text-black text-sm font-medium leading-normal"
                 style={{
@@ -313,11 +320,79 @@ const AnnotationList = ({pid}) => {
               >
                 Setting
               </button>
-            </div>
-            <div className="flex gap-2">
-            </div>
+            </nav>
           </div>
         </header>
+        {/* Mobile Menu */}
+        <div
+          className={`fixed inset-0 bg-black bg-opacity-40 z-50 transition-opacity duration-300 ${
+            menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+          onClick={toggleMenu}
+          style={{ marginBottom: "16px !important" }}
+        >
+          <div
+            className={`absolute top-0 left-0 w-full bg-white shadow-lg p-5 rounded-b-lg max-h-64 overflow-hidden transition-transform duration-300 transform ${
+              menuOpen ? "translate-y-0" : "-translate-y-full"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold mb-4 text-gray-700">Menu</h3>
+            <ul className="space-y-3">
+              <li>
+                <a
+                  href="/projects"
+                  className="text-black text-sm font-medium leading-normal hover:text-customHoverColor"
+                >
+                  Projects
+                </a>
+              </li>
+              <li>
+                <a className="text-black text-sm font-medium leading-normal hover:text-customHoverColor" href="https://platform.openai.com/finetune"
+              style={{
+                transition: "color 0.3s ease", // スムーズな変化を追加
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
+                  Finetune
+                </a>
+              </li>
+              <li>
+                <button
+                  className="text-black text-sm font-medium leading-normal"
+                  onClick={handleDownloadDataset}
+                  style={{
+                    transition: "color 0.3s ease", // スムーズな変化を追加
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+                >
+                  Download
+                </button>
+              </li>
+              <li>
+                <button
+                  className="text-black text-sm font-medium leading-normal"
+                  style={{
+                    transition: "color 0.3s ease", // スムーズな変化を追加
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+                  onClick={toggleModal}
+                >
+                  Setting
+                </button>
+              </li>
+            </ul>
+            <button
+              className="mt-5 w-full bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 mb-4"
+              onClick={toggleMenu}
+              style={{ marginBottom: "16px !important" }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
         <div className="flex justify-between items-center px-10 py-4">
           <button
             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-400"
@@ -357,113 +432,107 @@ const AnnotationList = ({pid}) => {
         )}
       </div>
       {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded shadow-lg w-1/3">
-              <h3 className="text-lg font-bold mb-4">Settings</h3>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSave(); // 保存処理を呼び出す
-                  toggleModal();
-                }}
-                onKeyDown={(e) => {
-                  if (e.target.tagName !== "TEXTAREA" && e.key === "Enter") {
-                    e.preventDefault(); // `textarea` 以外では Enter キーのデフォルト動作を無効化
-                  }
-                }}
-              >
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Name</label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border rounded"
-                    value={projectnameupdate}
-                    onChange={(e) => setProjectNameUpdate(e.target.value)}
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Description</label>
-                  <textarea
-                    className="w-full px-3 py-2 border rounded"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={3}
-                    style={{
-                      resize: "none", // 手動リサイズを防ぐ
-                      overflow: "hidden", // スクロールバーを非表示にする
-                    }}
-                    onInput={(e) => {
-                      // 高さをリセットしてから適切な高さに調整
-                      e.target.style.height = "auto";
-                      e.target.style.height = `${e.target.scrollHeight}px`;
-                    }}
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Model Register</label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border rounded"
-                    value={model}
-                    onChange={(e) => setModel(e.target.value)}
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Add Images</label>
-                  <input
-                    type="file"
-                    className="w-full px-3 py-2 border rounded"
-                    webkitdirectory="true"
-                    directory="true"
-                    multiple
-                    onChange={(e) => {
-                      setSelectedFiles(Array.from(e.target.files)); // 選択されたファイルを状態に保存
-                    }}
-                  />
-                </div>
-                <div className="mb-4">
-                  <button
-                    type="button"
-                    className="text-black text-sm font-medium leading-normal text-white px-4 py-2 rounded"
-                    style={{ backgroundColor: "#577399" }}
-                    onClick={() => {
-                      console.log("Model before navigating:", model);
-                      // PlayGroundViewを呼び出す（ここでモデル名を渡す）
-                      navigate(`/testmodel/${model}`);
-                    }}
-                  >
-                    Test Model
-                  </button>
-                </div>
-                <div className="flex items-center gap-9">
-                  <button
-                    className="text-black text-sm font-medium leading-normal text-white px-4 py-2 rounded"
-                    style={{ backgroundColor: "#FE5F55" }}
-                    onClick={() => handleDeleteProject(pid)}
-                  >
-                    Delete this projects
-                  </button>
-                </div>
-                <div className="flex justify-end gap-4">
-                  <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-200 rounded"
-                    onClick={toggleModal}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-500 text-white rounded"
-                    style={{ backgroundColor: "#495867" }}
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      className="bg-white p-6 sm:p-8 rounded shadow-lg w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl"
+      style={{ margin: "20px" }} // モバイル画面でのマージン調整
+    >
+      <h3 className="text-lg font-bold mb-4">Settings</h3>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSave(); // 保存処理を呼び出す
+          toggleModal();
+        }}
+        onKeyDown={(e) => {
+          if (e.target.tagName !== "TEXTAREA" && e.key === "Enter") {
+            e.preventDefault(); // `textarea` 以外では Enter キーのデフォルト動作を無効化
+          }
+        }}
+      >
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Name</label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border rounded"
+            value={projectnameupdate}
+            onChange={(e) => setProjectNameUpdate(e.target.value)}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Description</label>
+          <textarea
+            className="w-full px-3 py-2 border rounded resize-none"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            onInput={(e) => {
+              e.target.style.height = "auto";
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Model Register</label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border rounded"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Add Images</label>
+          <input
+            type="file"
+            className="w-full px-3 py-2 border rounded"
+            webkitdirectory="true"
+            directory="true"
+            multiple
+            onChange={(e) => {
+              setSelectedFiles(Array.from(e.target.files));
+            }}
+          />
+        </div>
+        <div className="mb-4">
+          <button
+            type="button"
+            className="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={() => navigate(`/testmodel/${model}`)}
+            style={{ background: "#577399" }}
+          >
+            Test Model
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-4 justify-between items-center">
+          <button
+            className="text-white bg-red-500 px-4 py-2 rounded w-full sm:w-auto"
+            onClick={() => handleDeleteProject(pid)}
+            style={{ background: "#AE445A" }}
+          >
+            Delete Project
+          </button>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              className="px-4 py-2 bg-gray-200 rounded"
+              onClick={toggleModal}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+              style={{ background: "#577399" }}
+            >
+              Save
+            </button>
           </div>
-        )}
+        </div>
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 };
