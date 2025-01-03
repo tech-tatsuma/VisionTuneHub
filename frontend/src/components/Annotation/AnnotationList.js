@@ -13,7 +13,7 @@ const AnnotationList = ({pid}) => {
   const [role, setRole] = useState("");
   const [instruction, setInstruction] = useState("");
   const [expectedResponse, setExpectedResponse] = useState("");
-  const [data_split, setDataSplit] = useState("");
+  const [data_split, setDataSplit] = useState("train");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [model, setModel] = useState("");
@@ -36,7 +36,7 @@ const AnnotationList = ({pid}) => {
       const data = await response.json();
       setAnnotations(data.annotations);
       setProjectName(data.project_info.name);
-      setDataSplit(data.dataset_split);
+      setDataSplit(data.annotations[currentImageIndex].dataset_split);
       setDescription(data.project_info.description);
       setModel(data.project_info.model);
       setProjectNameUpdate(data.project_info.name);
@@ -49,7 +49,7 @@ const AnnotationList = ({pid}) => {
 
   useEffect(() => {
     fetchAnnotations();
-  }, [pid]);
+  }, [pid, currentImageIndex]);
 
   useEffect(() => {
     // 現在のアノテーション情報を設定
@@ -104,6 +104,7 @@ const AnnotationList = ({pid}) => {
       label: expectedResponse,
       dataset_split: data_split,
     };
+    console.log("payload", payload);
   
     try {
       const response = await fetch(`${backendurl}/annotation/add_annotation`, {
@@ -132,7 +133,11 @@ const AnnotationList = ({pid}) => {
       setProjectName(updatedAnnotationsData.projectName);
       handleNextImage();
     } catch (error) {
-      console.error("Error updating annotation:", error);
+      if (error.response) {
+        console.error("Server response error:", error.response.status, error.response.data);
+      } else {
+        console.error("Error:", error.message);
+      }
     } finally {
       setIsLoading(false); // ローディング終了
     }
@@ -143,17 +148,17 @@ const AnnotationList = ({pid}) => {
       const response = await fetch(`${backendurl}/annotation/generate-jsonl?pid=${pid}`, {
         method: "POST",
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || "Failed to generate dataset");
       }
-
+  
       // Train と Val ファイルのURLを取得
       const result = await response.json();
-      const trainFileUrl = result.train_file;
-      const valFileUrl = result.val_file;
-
+      const trainFileUrl = `${backendurl}/annotation/download?path=${result.train_file}`;
+      const valFileUrl = `${backendurl}/annotation/download?path=${result.val_file}`;
+  
       // Train ファイルのダウンロード
       const trainResponse = await fetch(trainFileUrl);
       if (!trainResponse.ok) {
@@ -163,10 +168,12 @@ const AnnotationList = ({pid}) => {
       const trainUrl = window.URL.createObjectURL(trainBlob);
       const trainLink = document.createElement("a");
       trainLink.href = trainUrl;
-      trainLink.download = `${pid}_train.jsonl`;
+      trainLink.download = `train.jsonl`;
+      document.body.appendChild(trainLink);
       trainLink.click();
+      trainLink.remove();
       window.URL.revokeObjectURL(trainUrl);
-
+  
       // Val ファイルのダウンロード
       const valResponse = await fetch(valFileUrl);
       if (!valResponse.ok) {
@@ -176,9 +183,12 @@ const AnnotationList = ({pid}) => {
       const valUrl = window.URL.createObjectURL(valBlob);
       const valLink = document.createElement("a");
       valLink.href = valUrl;
-      valLink.download = `${pid}_val.jsonl`;
+      valLink.download = `val.jsonl`;
+      document.body.appendChild(valLink);
       valLink.click();
+      valLink.remove();
       window.URL.revokeObjectURL(valUrl);
+  
     } catch (error) {
       console.error("Error downloading dataset:", error);
     }

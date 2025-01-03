@@ -66,7 +66,7 @@ const ProjectList = () => {
     };
 
     return (
-        <div className="px-20 flex flex-1 justify-center py-5" style={{ width: "100%" }}>
+        <div className="sm:px-20 px-4 flex flex-1 justify-center py-5" style={{ width: "100%" }}>
             <div className="layout-content-container flex flex-col flex-1">
                     {/* Header */}
                     <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#EEEEEE] px-10 py-3">

@@ -6,6 +6,7 @@ import os
 import json
 import unicodedata
 import base64
+from urllib.parse import quote
 
 # エンドポイントをグループ化するためのAPIRouterの設定
 router = APIRouter(
@@ -36,9 +37,9 @@ async def get_annotations(pid: str):
         # JSONの読み込みエラーに対応
         raise HTTPException(status_code=500, detail="Error reading annotation file")
 
-# 画像ファイルをエンコードする関数
-def encode_image(image_file):
-    return base64.b64encode(image_file).decode('utf-8')
+def encode_image(image_path):
+	with open(image_path, "rb") as image_file:
+		return base64.b64encode(image_file.read()).decode('utf-8')
 
 # アノテーションデータを元にデータセットを作成する関数
 def annojson2dataset(pid, dataset_split):
@@ -51,17 +52,14 @@ def annojson2dataset(pid, dataset_split):
         annotations = json.load(f)
 
     # データセットファイルの作成
-    dataset_path = os.path.join(project_root, "dataset.jsonl")
+    dataset_path = os.path.join(project_root, f"{dataset_split}_dataset.jsonl")
     with open(dataset_path, "w", encoding="utf-8") as f:
         for anno in annotations: # アノテーションごとに処理
             if anno["dataset_split"] == dataset_split and (anno["sys"] != "") and (anno["user"] != "") and (anno["label"] != ""):
                 # 画像ファイルのパスを取得
                 image_path = os.path.join(project_root, "imgs", anno["image"])
-                # 画像データの読み込み
-                with open(image_path, "rb") as i:
-                    image_data = i.read()
                 # 画像データをBase64エンコード
-                base64_image = encode_image(image_data)
+                base64_image = encode_image(image_path)
                 # エンコードした画像データをURL形式に変換
                 url = f"data:image/jpeg;base64,{base64_image}"
                 # JSONL形式のデータを作成
@@ -85,14 +83,14 @@ async def generate_jsonl(pid: str):
     try:
         train_path = annojson2dataset(pid, "train")
         val_path = annojson2dataset(pid, "val")
-        train_file = os.path.abspath(train_path)
-        val_file = os.path.abspath(val_path)
+        train_file_relative = os.path.relpath(train_path, ".")
+        val_file_relative = os.path.relpath(val_path, ".")
         # ファイルの存在確認
-        if not os.path.exists(train_file) or not os.path.exists(val_file):
+        if not os.path.exists(train_file_relative) or not os.path.exists(val_file_relative):
             raise HTTPException(status_code=500, detail="JSONL file creation failed")
         return {
-            "train_file": f"/annotation/download?path={train_file}",
-            "val_file": f"/annotation/download?path={val_file}"
+            "train_file": f"{train_file_relative}",
+            "val_file": f"{val_file_relative}"
         }
     except Exception as e:
         # エラーが発生した場合に例外のトレースバックを表示
@@ -105,7 +103,14 @@ async def generate_jsonl(pid: str):
 async def download_file(path: str):
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="File not found")
-    filename = os.path.basename(path)
+    print(path)
+    if "train" in path:
+        filename = "train.jsonl"
+    elif "val" in path:
+        filename = "val.jsonl"
+    else:
+        filename = os.path.basename(path)
+    print(filename)
     return FileResponse(path, media_type='application/json', filename=filename)
 
 # プロジェクトのアノテーション情報を取得するエンドポイント
