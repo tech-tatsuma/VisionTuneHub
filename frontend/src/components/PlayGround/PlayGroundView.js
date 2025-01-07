@@ -214,6 +214,27 @@ const PlayGroundView = ({modelname}) => {
     </div>
   </label>
 
+  <label>
+                  <span className="text-black text-sm md:text-base font-bold leading-tight">
+                    Model Name
+                  </span>
+                  <textarea
+                    placeholder="Enter model name"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    rows={1}
+                    style={{
+                      resize: "none",
+                      overflow: "hidden",
+                    }}
+                    onInput={(e) => {
+                      e.target.style.height = "auto";
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
+                    className="border border-[#E0E0E0] p-2 rounded w-full"
+                  />
+                </label>
+
             <label>
               <span className="text-black text-sm md:text-base font-bold leading-tight">
                 Role
