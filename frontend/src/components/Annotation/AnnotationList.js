@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import AnnotationCard from "./AnnotationCard";
 import { useNavigate } from "react-router-dom";
-import PlayGroundView from './../PlayGround/PlayGroundView';
+import "./../PlayGround/PlayGroundView.css";
 
-const AnnotationList = ({pid}) => {
+const AnnotationList = ({ pid }) => {
 
   const backendurl = process.env.REACT_APP_BACKEND_URL;
 
@@ -105,7 +105,7 @@ const AnnotationList = ({pid}) => {
       dataset_split: data_split,
     };
     console.log("payload", payload);
-  
+
     try {
       const response = await fetch(`${backendurl}/annotation/add_annotation`, {
         method: "POST",
@@ -114,15 +114,15 @@ const AnnotationList = ({pid}) => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || "Failed to update annotation");
       }
-  
+
       const result = await response.json();
       console.log("Annotation updated successfully:", result);
-  
+
       // 再度アノテーションを取得
       setIsLoading(true); // ローディング開始
       const updatedAnnotationsResponse = await fetch(
@@ -148,17 +148,17 @@ const AnnotationList = ({pid}) => {
       const response = await fetch(`${backendurl}/annotation/generate-jsonl?pid=${pid}`, {
         method: "POST",
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || "Failed to generate dataset");
       }
-  
+
       // Train と Val ファイルのURLを取得
       const result = await response.json();
       const trainFileUrl = `${backendurl}/annotation/download?path=${result.train_file}`;
       const valFileUrl = `${backendurl}/annotation/download?path=${result.val_file}`;
-  
+
       // Train ファイルのダウンロード
       const trainResponse = await fetch(trainFileUrl);
       if (!trainResponse.ok) {
@@ -173,7 +173,7 @@ const AnnotationList = ({pid}) => {
       trainLink.click();
       trainLink.remove();
       window.URL.revokeObjectURL(trainUrl);
-  
+
       // Val ファイルのダウンロード
       const valResponse = await fetch(valFileUrl);
       if (!valResponse.ok) {
@@ -188,7 +188,7 @@ const AnnotationList = ({pid}) => {
       valLink.click();
       valLink.remove();
       window.URL.revokeObjectURL(valUrl);
-  
+
     } catch (error) {
       console.error("Error downloading dataset:", error);
     }
@@ -248,23 +248,27 @@ const AnnotationList = ({pid}) => {
     setIsModalOpen(!isModalOpen);
   };
 
-  if (isLoading) {
-    // ローディング中の表示
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-black text-lg font-medium">Loading...</p>
-      </div>
-    );
-  }
+  {isLoading && (
+        <div className="loading-overlay">
+          <div className="loader-container">
+            <div className="loader">
+              <div className="circle">&nbsp;</div>
+              <div className="circle">&nbsp;</div>
+              <div className="circle">&nbsp;</div>
+              <div className="circle">&nbsp;</div>
+            </div>
+          </div>
+        </div>
+      )}
 
-  
+
   return (
     <div
       className="relative flex size-full min-h-screen flex-col bg-[#FFFFFF] overflow-x-hidden"
       style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
     >
       <div className="layout-container flex h-full grow flex-col">
-      <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#EEEEEE] px-10 py-3">
+        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#EEEEEE] px-10 py-3">
           <div className="flex items-center gap-4 text-black">
             <div className="size-4">
               <svg
@@ -300,11 +304,11 @@ const AnnotationList = ({pid}) => {
                 Projects
               </a>
               <a className="text-black text-sm font-medium leading-normal hover:text-customHoverColor" href="https://platform.openai.com/finetune"
-              style={{
-                transition: "color 0.3s ease", // スムーズな変化を追加
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+                style={{
+                  transition: "color 0.3s ease", // スムーズな変化を追加
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
               >
                 Finetune
               </a>
@@ -335,16 +339,14 @@ const AnnotationList = ({pid}) => {
         </header>
         {/* Mobile Menu */}
         <div
-          className={`fixed inset-0 bg-black bg-opacity-40 z-50 transition-opacity duration-300 ${
-            menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
+          className={`fixed inset-0 bg-black bg-opacity-40 z-50 transition-opacity duration-300 ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+            }`}
           onClick={toggleMenu}
           style={{ marginBottom: "16px !important" }}
         >
           <div
-            className={`absolute top-0 left-0 w-full bg-white shadow-lg p-5 rounded-b-lg max-h-64 overflow-hidden transition-transform duration-300 transform ${
-              menuOpen ? "translate-y-0" : "-translate-y-full"
-            }`}
+            className={`absolute top-0 left-0 w-full bg-white shadow-lg p-5 rounded-b-lg max-h-64 overflow-hidden transition-transform duration-300 transform ${menuOpen ? "translate-y-0" : "-translate-y-full"
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold mb-4 text-gray-700">Menu</h3>
@@ -359,11 +361,11 @@ const AnnotationList = ({pid}) => {
               </li>
               <li>
                 <a className="text-black text-sm font-medium leading-normal hover:text-customHoverColor" href="https://platform.openai.com/finetune"
-              style={{
-                transition: "color 0.3s ease", // スムーズな変化を追加
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
+                  style={{
+                    transition: "color 0.3s ease", // スムーズな変化を追加
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#577399")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}>
                   Finetune
                 </a>
               </li>
@@ -442,107 +444,107 @@ const AnnotationList = ({pid}) => {
         )}
       </div>
       {isModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div
-      className="bg-white p-6 sm:p-8 rounded shadow-lg w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl"
-      style={{ margin: "20px" }} // モバイル画面でのマージン調整
-    >
-      <h3 className="text-lg font-bold mb-4">Settings</h3>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSave(); // 保存処理を呼び出す
-          toggleModal();
-        }}
-        onKeyDown={(e) => {
-          if (e.target.tagName !== "TEXTAREA" && e.key === "Enter") {
-            e.preventDefault(); // `textarea` 以外では Enter キーのデフォルト動作を無効化
-          }
-        }}
-      >
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Name</label>
-          <input
-            type="text"
-            className="w-full px-3 py-2 border rounded"
-            value={projectnameupdate}
-            onChange={(e) => setProjectNameUpdate(e.target.value)}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Description</label>
-          <textarea
-            className="w-full px-3 py-2 border rounded resize-none"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            onInput={(e) => {
-              e.target.style.height = "auto";
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Model Register</label>
-          <input
-            type="text"
-            className="w-full px-3 py-2 border rounded"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Add Images</label>
-          <input
-            type="file"
-            className="w-full px-3 py-2 border rounded"
-            webkitdirectory="true"
-            directory="true"
-            multiple
-            onChange={(e) => {
-              setSelectedFiles(Array.from(e.target.files));
-            }}
-          />
-        </div>
-        <div className="mb-4">
-          <button
-            type="button"
-            className="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded"
-            onClick={() => navigate(`/testmodel/${model}`)}
-            style={{ background: "#577399" }}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white p-6 sm:p-8 rounded shadow-lg w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl"
+            style={{ margin: "20px" }} // モバイル画面でのマージン調整
           >
-            Test Model
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-4 justify-between items-center">
-          <button
-            className="text-white bg-red-500 px-4 py-2 rounded w-full sm:w-auto"
-            onClick={() => handleDeleteProject(pid)}
-            style={{ background: "#AE445A" }}
-          >
-            Delete Project
-          </button>
-          <div className="flex gap-4">
-            <button
-              type="button"
-              className="px-4 py-2 bg-gray-200 rounded"
-              onClick={toggleModal}
+            <h3 className="text-lg font-bold mb-4">Settings</h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSave(); // 保存処理を呼び出す
+                toggleModal();
+              }}
+              onKeyDown={(e) => {
+                if (e.target.tagName !== "TEXTAREA" && e.key === "Enter") {
+                  e.preventDefault(); // `textarea` 以外では Enter キーのデフォルト動作を無効化
+                }
+              }}
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded"
-              style={{ background: "#577399" }}
-            >
-              Save
-            </button>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Name</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded"
+                  value={projectnameupdate}
+                  onChange={(e) => setProjectNameUpdate(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded resize-none"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  onInput={(e) => {
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Model Register</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded"
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Add Images</label>
+                <input
+                  type="file"
+                  className="w-full px-3 py-2 border rounded"
+                  webkitdirectory="true"
+                  directory="true"
+                  multiple
+                  onChange={(e) => {
+                    setSelectedFiles(Array.from(e.target.files));
+                  }}
+                />
+              </div>
+              <div className="mb-4">
+                <button
+                  type="button"
+                  className="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded"
+                  onClick={() => navigate(`/testmodel/${model}`)}
+                  style={{ background: "#577399" }}
+                >
+                  Test Model
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-4 justify-between items-center">
+                <button
+                  className="text-white bg-red-500 px-4 py-2 rounded w-full sm:w-auto"
+                  onClick={() => handleDeleteProject(pid)}
+                  style={{ background: "#AE445A" }}
+                >
+                  Delete Project
+                </button>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-gray-200 rounded"
+                    onClick={toggleModal}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded"
+                    style={{ background: "#577399" }}
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
-      </form>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };

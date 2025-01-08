@@ -1,4 +1,4 @@
-import React , {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProjectDetails from './ProjectDetails';
 
@@ -7,12 +7,13 @@ const ProjectList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [projectsPerPage] = useState(10);
     const [visiblePages, setVisiblePages] = useState([]);
-    const [menuOpen, setMenuOpen] = useState(false); 
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [searchKeyword, setSearchKeyword] = useState('');
     const backendurl = process.env.REACT_APP_BACKEND_URL;
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(backendurl+'/projects/list')
+        fetch(backendurl + '/projects/list')
             .then(response => response.json())
             .then(data => setProjects(data))
             .catch(error => console.error('Error fetching project list:', error));
@@ -42,6 +43,19 @@ const ProjectList = () => {
         calculateVisiblePages();
     }, [projects.length, currentPage, projectsPerPage]);
 
+    // 検索キーワードが変更されたら検索を実行
+    useEffect(() => {
+        if (searchKeyword.trim() !== '') {
+            searchProjects(searchKeyword);
+        } else {
+            // 検索キーワードが空の場合は全プロジェクトを再取得
+            fetch(`${backendurl}/projects/list`)
+                .then(response => response.json())
+                .then(data => setProjects(data))
+                .catch(error => console.error('Error fetching project list:', error));
+        }
+    }, [searchKeyword, backendurl]);
+
     const indexOfLastProject = currentPage * projectsPerPage;
     const indexOfFirstProject = indexOfLastProject - projectsPerPage;
     const currentProjects = projects.slice(indexOfFirstProject, indexOfLastProject);
@@ -53,6 +67,19 @@ const ProjectList = () => {
 
     const handleAddProject = () => {
         navigate('/makepro');
+    };
+
+    // 検索用関数
+    const searchProjects = async (keyword) => {
+        try {
+            const response = await fetch(`${backendurl}/projects/search?keyword=${encodeURIComponent(keyword)}`);
+            console.log(`${backendurl}/projects/search?keyword=${encodeURIComponent(keyword)}`);
+            const data = await response.json();
+            setProjects(data.matched_projects || []);
+            setCurrentPage(1); // 検索結果表示時に1ページ目に戻す
+        } catch (error) {
+            console.error('Error searching projects:', error);
+        }
     };
 
     const gridStyles = {
@@ -68,8 +95,8 @@ const ProjectList = () => {
     return (
         <div className="sm:px-20 px-4 flex flex-1 justify-center py-5" style={{ width: "100%" }}>
             <div className="layout-content-container flex flex-col flex-1">
-                    {/* Header */}
-                    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#EEEEEE] px-10 py-3">
+                {/* Header */}
+                <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#EEEEEE] px-10 py-3">
                     <div className="flex items-center gap-4 text-black">
                         <div className="size-4">
                             <svg
@@ -96,6 +123,13 @@ const ProjectList = () => {
                             ☰
                         </button>
                         <nav className="hidden lg:flex items-center gap-9">
+                        <input
+                            type="text"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            placeholder="Search projects..."
+                            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+                        />
                             <a
                                 className="text-black text-sm font-medium leading-normal"
                                 href="/playground"
@@ -112,15 +146,13 @@ const ProjectList = () => {
                 </header>
 
                 <div
-                    className={`fixed inset-0 bg-black bg-opacity-40 z-50 transition-opacity duration-300 ${
-                        menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
+                    className={`fixed inset-0 bg-black bg-opacity-40 z-50 transition-opacity duration-300 ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                        }`}
                     onClick={toggleMenu}
                 >
                     <div
-                        className={`absolute top-0 left-0 w-full bg-white shadow-lg p-5 rounded-b-lg max-h-64 overflow-hidden transition-transform duration-300 transform ${
-                            menuOpen ? "translate-y-0" : "-translate-y-full"
-                        }`}
+                        className={`absolute top-0 left-0 w-full bg-white shadow-lg p-5 rounded-b-lg max-h-64 overflow-hidden transition-transform duration-300 transform ${menuOpen ? "translate-y-0" : "-translate-y-full"
+                            }`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h3 className="text-lg font-bold mb-4 text-gray-700">Menu</h3>
@@ -133,6 +165,13 @@ const ProjectList = () => {
                                     PlayGround
                                 </a>
                             </li>
+                            <input
+                            type="text"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            placeholder="Search projects..."
+                            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+                        />
                         </ul>
                         <button
                             className="mt-5 w-full bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
@@ -159,8 +198,8 @@ const ProjectList = () => {
                 </div>
 
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3 p-4">
-                <div style={gridStyles}>
-                {currentProjects.map((project, index) => (
+                    <div style={gridStyles}>
+                        {currentProjects.map((project, index) => (
                             <ProjectDetails
                                 key={index}
                                 image={project.first_image || 'https://via.placeholder.com/150'}
@@ -176,11 +215,10 @@ const ProjectList = () => {
                         <button
                             key={index}
                             onClick={() => handlePageChange(pageNumber)}
-                            className={`mx-1 px-3 py-1 rounded-full ${
-                                currentPage === pageNumber ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
-                            } hover:bg-blue-400 focus:outline-none ${pageNumber === '...' ? 'cursor-default' : ''}`}
+                            className={`mx-1 px-3 py-1 rounded-full ${currentPage === pageNumber ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
+                                } hover:bg-blue-400 focus:outline-none ${pageNumber === '...' ? 'cursor-default' : ''}`}
                             disabled={pageNumber === '...'}
-                            style={{ background: "#577399"}}
+                            style={{ background: "#577399" }}
                             onMouseEnter={(e) => (e.currentTarget.style.background = "#495867")}
                             onMouseLeave={(e) => (e.currentTarget.style.background = "#577399")}
                         >

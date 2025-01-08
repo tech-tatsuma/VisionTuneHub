@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Query
 from pydantic import BaseModel
 from typing import List
 import os
@@ -9,6 +9,7 @@ from PIL import Image
 import random
 import logging
 from fastapi.logger import logger
+import re
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,9 +54,10 @@ async def create_project(
             print(f"Skipped non-image file: {file.filename}")
             continue
 
-        # ファイル名と保存パスを設定
-        file_name = os.path.basename(file.filename.replace("\\", "/"))
-        full_file_path = os.path.join(imgs_dir, file_name)
+        # 新しいユニークなファイル名を生成
+        file_extension = os.path.splitext(file.filename)[1]  # ファイル拡張子を取得
+        unique_file_name = f"{uuid.uuid4().hex}{file_extension}"  # ユニークな名前を生成
+        full_file_path = os.path.join(imgs_dir, unique_file_name)
 
         # ファイル保存
         with open(full_file_path, "wb") as buffer:
@@ -112,7 +114,8 @@ async def create_project(
 @router.delete("/delete/{project_id}", status_code=status.HTTP_200_OK)
 async def delete_project(project_id: str):
     # プロジェクトディレクトリのパス
-    project_root = f"./datas/{project_id}"
+    # project_root = f"./datas/{project_id}"
+    project_root = os.path.join("datas", f"{project_id}")
 
     # ディレクトリとその内容を削除
     if os.path.exists(project_root):
@@ -175,7 +178,8 @@ async def add_image(
     logger.info(f"Received files: {files}")
     logger.info(f"Received pid: {pid}, name: {name}, description: {description}, model: {model}")
     # プロジェクトディレクトリのパスを取得
-    project_root = f"./datas/{pid}"
+    # project_root = f"./datas/{pid}"
+    project_root = os.path.join("datas", f"{pid}")
     imgs_dir = os.path.join(project_root, "imgs")
     annotation_file = os.path.join(project_root, "annotation.json")
     project_info_file = os.path.join(project_root, "project_info.json")
@@ -196,9 +200,10 @@ async def add_image(
             except (IOError, SyntaxError):
                 continue
 
-            # ファイル名と保存パスを設定
-            file_name = os.path.basename(file.filename.replace("\\", "/"))
-            full_file_path = os.path.join(imgs_dir, file_name)
+            # 新しいユニークなファイル名を生成
+            file_extension = os.path.splitext(file.filename)[1]  # ファイル拡張子を取得
+            unique_file_name = f"{uuid.uuid4().hex}{file_extension}"  # ユニークな名前を生成
+            full_file_path = os.path.join(imgs_dir, unique_file_name)
 
             # 重複チェック
             if os.path.exists(full_file_path):
@@ -239,3 +244,43 @@ async def add_image(
         json.dump(project_info, f, indent=4, ensure_ascii=False)
     
     return {"message": "Images added successfully", "project": project_info, "annotations": annotations}
+
+@router.get("/search", status_code=status.HTTP_200_OK)
+async def search_projects(keyword: str = Query(..., description="検索するキーワード")):
+    # プロジェクトが格納されているディレクトリ
+    datas_dir = os.path.abspath("./datas")
+    matched_projects = []
+
+    # datasディレクトリを探索
+    if os.path.exists(datas_dir):
+        for project_id in os.listdir(datas_dir):
+            project_root = os.path.join(datas_dir, project_id)
+            project_info_path = os.path.join(project_root, "project_info.json")
+            imgs_dir = os.path.join(project_root, "imgs")
+            first_image = None
+
+            # プロジェクト情報を読み込み
+            if os.path.exists(project_info_path):
+                with open(project_info_path, "r", encoding="utf-8") as f:
+                    info = json.load(f)
+
+                # 最初の画像ファイルを取得
+                if os.path.exists(imgs_dir):
+                    images = [img for img in os.listdir(imgs_dir) if img.lower().endswith(('png', 'jpg', 'jpeg', 'gif'))]
+                    if images:
+                        first_image = os.path.join(imgs_dir, images[0])
+
+                # name または description に正規表現が一致する場合
+                if (re.search(keyword, info.get("name", ""), re.IGNORECASE) or
+                        re.search(keyword, info.get("description", ""), re.IGNORECASE)):
+                    matched_projects.append({
+                        "id": info["id"],
+                        "name": info["name"],
+                        "created_at": info["created_at"],
+                        "description": info["description"],
+                        "image_count": info.get("image_count", 0),
+                        "first_image": first_image,
+                        "dir_path": info["dir_path"]
+                    })
+
+    return {"matched_projects": matched_projects}

@@ -18,7 +18,8 @@ router = APIRouter(
 @router.get("/get_annotations")
 async def get_annotations(pid: str):
     # プロジェクトルートの設定
-    project_root = f"./datas/{pid}"
+    # project_root = f"./datas/{pid}"
+    project_root = os.path.join("datas", f"{pid}")
     annotation_file = os.path.join(project_root, "annotation.json")
     project_info_file = os.path.join(project_root, "project_info.json")
 
@@ -44,7 +45,8 @@ def encode_image(image_path):
 # アノテーションデータを元にデータセットを作成する関数
 def annojson2dataset(pid, dataset_split):
     # プロジェクトルートとアノテーションファイルのパスを設定
-    project_root = f"./datas/{pid}"
+    # project_root = f"./datas/{pid}"
+    project_root = os.path.join("datas", f"{pid}")
     annotation_file = os.path.join(project_root, "annotation.json")
 
     # アノテーションファイルの読み込み
@@ -116,7 +118,8 @@ async def download_file(path: str):
 # プロジェクトのアノテーション情報を取得するエンドポイント
 @router.get("/get_annotations")
 async def get_annotations(pid: str):
-    project_root = f"./datas/{pid}"
+    # project_root = f"./datas/{pid}"
+    project_root = os.path.join("datas", f"{pid}")
     annotation_file = os.path.join(project_root, "annotation.json")
     project_info_file = os.path.join(project_root, "project_info.json")
 
@@ -145,7 +148,8 @@ def normalize_string(s: str) -> str:
 # アノテーション情報を受け取り，JSONファイルを更新するエンドポイント
 @router.post("/add_annotation")
 async def add_annotation(anno_info: AnnotationInfo):
-    project_root = f"./datas/{anno_info.pid}"
+    # project_root = f"./datas/{anno_info.pid}"
+    project_root = os.path.join("datas", f"{anno_info.pid}")
     annotation_file = os.path.join(project_root, "annotation.json")
 
     # アノテーションファイルの存在確認
